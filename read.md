@@ -1,7 +1,7 @@
 # project : This is a project on backend
 
 # code explaination : mongodb connection
-
+1. Connecting the database in index.js
 (async ()=>{
     try {
         await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
@@ -24,4 +24,23 @@ EXPLANATION :
 1. First of all this is an **IFFE** function (immediately executed).
 2. The process of database connection can be problematic hence to handle the error while connecting it uses **TRY-CATCH** block.
 3. The database is always situated in another continent( far-off). Hence the connection may take some time. So **async-await** is used.
+
+2. Connecting the database in a separate file and importing it in index.js
+//CODE:
+
+connectDB() 
+.then(()=>{
+    app.on("error",(error)=>{
+        console.log("ERR:",error);
+        throw error;
+    })
+    app.listen(process.env.PORT || 8000 ,()=>{
+        console.log(`Server is running at port : ${process.env.PORT}`)
+    })
+})
+.catch((err)=>{
+    console.log("MONGO db connection failed!!",err);
+})
+
+//This code imports the connectDB function from connection.js and runs it. Once the database is connected it will start the express server and throw the error if any.
 
