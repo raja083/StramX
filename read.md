@@ -44,3 +44,20 @@ connectDB()
 
 //This code imports the connectDB function from connection.js and runs it. Once the database is connected it will start the express server and throw the error if any.
 
+
+
+# JWT : its working 
+JWT is used to generate access token and refresh token . The work fow is :
+
+-> User logs in.
+-> Server generates:
+    Access Token (short-lived)
+    Refresh Token (long-lived)
+->Client stores tokens:
+    Access Token: in memory / localStorage / cookie
+    Refresh Token: ideally in HTTP-only cookie (safer!)
+->Client uses Access Token to make API calls.
+->When Access Token expires:
+    Client sends the Refresh Token to server (usually via a special endpoint like /token/refresh).
+-> Server verifies the Refresh Token and    issues a new Access Token (and maybe new Refresh Token).
+User continues using app without re-logging in.
