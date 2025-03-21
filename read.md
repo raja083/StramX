@@ -61,3 +61,18 @@ JWT is used to generate access token and refresh token . The work fow is :
     Client sends the Refresh Token to server (usually via a special endpoint like /token/refresh).
 -> Server verifies the Refresh Token and    issues a new Access Token (and maybe new Refresh Token).
 User continues using app without re-logging in.
+
+
+# controllers
+
+# user registration: 
+1. Get the user details from frontend.
+2. validations : check email if it is correct and not empty
+3. check if user already exists  : using username and email
+4. check if files are provided or not (avatar and cover image)
+5. upload the images to cloudinary
+6. create user object - create entry in db
+7. remove password and refresh token field from response
+8. check for user creation
+9. return response or error if not formed user
+

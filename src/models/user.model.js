@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema(
 //before saving the above data into database, encrypt the password if it is modified (pre is used to do something before something else is done)
 userSchema.pre("save", async function (next){
     if(this.isModified("password")){
-        this.password = bcrypt.hash(this.password, 10);
+        this.password = await bcrypt.hash(this.password, 10);
     }
     next()
 })

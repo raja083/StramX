@@ -17,7 +17,7 @@ app.use(cookieParser());
 //routes import
 import userRouter from './routes/user.routes.js' //manchaha name tabhi de skte hain jab export default ho
 
-
+         
 //routes declaration
 app.use("/api/v1/users", userRouter)   //koi v user likega /users control will shift to userRouter middleware
 
