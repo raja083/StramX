@@ -6,7 +6,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 //method to register user
 const registerUser = asyncHandler(async (req,res)=>{
     //get user details from frontend using req.body but it cannot get files so we use multer
-    const {username, email, fullname } = req.body;
+    const {username, email, fullname ,password} = req.body;
+    console.log(req.body);
+    console.log("Files received:", req.files);
     
     if(fullname === "" || email ==="" || username==="" || password ===""){  //check if any field is empty
         throw new ApiError(400,"All fields are rerquired");
@@ -14,24 +16,28 @@ const registerUser = asyncHandler(async (req,res)=>{
 
     //check if the user is already registered using email and username
 
-    const existedUser = User.findOne({
+    const existedUser =await User.findOne({
         $or: [ {username} , {email} ]
     })
-
     if(existedUser){
         throw new ApiError(409,"User with email or username already exists.")
     }
 
     //check if files are uploaded or not
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    let coverImageLocalPath
+
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
     if (!avatarLocalPath) {
         throw new ApiError(400,"Avatar required");
     }
-
+    console.log(avatarLocalPath);
     // upload both coverimage and avatar to cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
+    console.log("Cloudinary Avatar Response:", avatar);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
     //check avatar again

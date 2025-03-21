@@ -4,6 +4,7 @@ import connectDB from './db/connection.js';
 import express from 'express';
 import { app } from './app.js';
 
+
 //database connection
 connectDB() 
 .then(()=>{
