@@ -3,6 +3,7 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  renewAccessToken,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -27,5 +28,9 @@ router.route("/login").post(loginUser);
 
 //secured routes (Here verifyJWT is a middleware). It gives access of req.user to the logoutUser method
 router.route("/logout").post(verifyJWT, logoutUser);
+
+
+//to renew refresh token
+router.route("/refresh-token").post(renewAccessToken);
 
 export default router;
