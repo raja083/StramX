@@ -22,7 +22,7 @@ router.route("/register").post(
   ]),
   registerUser
 ); //http://localhost:8000/api/v1/users/register pe jane pe ye wla registerUser method call hoga
-//upload ia s middleware (multer)  used to upload the files like avatar, cover image etc.
+//upload is a middleware (multer)  used to upload the files like avatar, cover image etc.
 
 router.route("/login").post(loginUser);
 
