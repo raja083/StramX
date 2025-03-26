@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from 'jsonwebtoken';
+import { Subscription } from "../models/subscription.models.js";
 
 //method to generate access and refresh token 
 const generateAccessAndRefreshTokens = async (userId)=>{
@@ -260,7 +261,7 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
         throw new ApiError(400,"All fields are required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set:{
@@ -334,6 +335,89 @@ const updateUsercoverImage = asyncHandler ( async (req,res)=>{
    )
  
  })
+
+ //handling subscribers and channels (using aggregation pipelines)
+
+ //searching for a channel
+ const getuserChannelProfile = asyncHandler(async (req,res)=>{
+    const {username} = req.params; //params from url
+    if(!username?.trim()){
+        throw new ApiError(400,"username is missing")
+    }
+
+    // await User.find({username}) (also true)
+
+    //the value that we get from an aggregate pipeline is an array
+    const channel = await User.aggregate([
+        //find the channel (user) using username
+        {
+            $match:{
+                username: username?.toLowerCase()
+            }
+        },
+        //find the count of subscribers of the channel
+        {
+            $lookup:{
+                from:"subscriptions", //the database to look upon
+                localField:"_id", //means you're matching the _id field from the current collection. (the channel that we found using the above pipeline)
+                foreignField:"channel", // means that the channel field in the "subscriptions" collection should match the _id of the current collection's documents.
+                as:"subscribers" //return the result as subscribers
+            }
+        },
+        //find the count of channels the channel (username) has subscribed to 
+        {
+            $lookup:"subscriptions",
+            localField:"_id",
+            foreignField:"subscriber",
+            as:"subscribedTo"
+        },
+        //add additional values to the result
+        {
+            $addFields:{
+                subscribersCount:{
+                    $size:"$subscribers"
+                },
+                channelsSubscribedToCount:{
+                    $size:"$subscribedTo"
+                },
+                isSubscribed:{ //check if the user who is searching the channel is subscribed (return true or false)
+                    $cond:{ 
+                        if:{$in: [req.user?._id,"$subscribers.subscriber"]},//if the user is in the subscribers object
+                        then: true,
+                        else: false
+
+                    }
+                }
+            }
+        },
+        //return the data
+        {
+            $project:{//kya kya field return karna hai 
+                fullname:1,
+                username:1,
+                subscribersCount:1,
+                channelsSubscribedToCount:1,
+                isSubscribed:1,
+                avatar:1,
+                coverImage:1
+            }
+        }
+    ])
+
+    if(!channel?.length){
+        throw new ApiError(404,"Channel doesn't exist")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,channel[0],"User channel fetched successfully")
+    )
+
+ })
+
+
+
 export {registerUser,
     loginUser,
     logoutUser,
@@ -342,6 +426,7 @@ export {registerUser,
     updateAccountDetails,
     getCurrentUser,
     changeCurrentPassword,
-    updateUsercoverImage
+    updateUsercoverImage,
+    getuserChannelProfile
 
 };
